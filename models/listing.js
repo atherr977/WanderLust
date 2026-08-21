@@ -8,7 +8,7 @@ const listingSchema = new Schema({
   },
   description: String,
   image: {
-    type: String,
+   type: String,
     default:"https://unsplash.com/photos/person-in-swimming-pool-during-daytime-rlwE8f8anOc",
     set: (v) =>
       v === ""
