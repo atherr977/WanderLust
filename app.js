@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -6,8 +7,7 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
-
+const MONGO_URL = process.env.MONGO_URL;
 main()
   .then(() => {
     console.log("connected to DB");
@@ -100,3 +100,4 @@ app.delete("/listings/:id", async (req, res) => {
 app.listen(8080, () => {
   console.log("server is listening to port 8080");
 });
+module.exports = app;
