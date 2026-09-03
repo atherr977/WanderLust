@@ -28,8 +28,10 @@ app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
 //ROOT Route
-app.get("/", (req, res) => {
-  res.send("Hi, I am root");
+app.get("/", async (req, res) => {
+  //res.send("Hi, I am root");
+  const allListings = await Listing.find({});
+  res.render("listings/index.ejs", { allListings });
 });
 
 //Index Route
