@@ -57,10 +57,10 @@ body {
     align-items: space-evenly;
 }
 
-/* cards */
-.card {
-    border: none !important;
-    margin-bottom: 2rem;
+/* Cards */
+.listing-card {
+  border: none !important;
+  margin-bottom: 2rem;
 }
 
 .card-img-top {
