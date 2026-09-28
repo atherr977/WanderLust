@@ -25,14 +25,13 @@ if (!MONGO_URL) {
   throw new Error("MONGO_ATLAS_URL is not defined");
 }
 
-async function main() {
-  await mongoose.connect(MONGO_URL);
-  console.log("CONNECTED TO MONGODB");
-}
-
-main().catch((err) => {
-  console.error("MONGODB CONNECTION ERROR:", err);
-});
+mongoose.connect(MONGO_URL)
+  .then(() => {
+    console.log("CONNECTED TO MONGODB");
+  })
+  .catch((err) => {
+    console.error("MONGODB CONNECTION ERROR:", err);
+  });
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
