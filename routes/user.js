@@ -11,7 +11,7 @@ router.get("/signup", (req, res) => {
 
 router.post(
   "/signup",
-  wrapAsync(async (req, res) => {
+  wrapAsync(async (req, res, next) => {
     try {
       let { username, email, password } = req.body;
       const newUser = new User({ email, username });
