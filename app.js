@@ -1,4 +1,3 @@
-
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -7,7 +6,7 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
 const session = require("express-session");
-const MongoStore = require("connect-mongo");
+const MongoStore = require("connect-mongo").default;
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -69,23 +68,11 @@ app.get("/", (req, res) => {
   res.send("Hi, I am root");
 });
 
-// app.get("/demouser", async (req, res) => {
-//     let fakeUser = new User({
-//         email: "student@gmail.com",
-//         username: "ather07",
-//     });
-
-//     let registeredUser = await User.register(fakeUser, "helloworld");
-//     res.send(registeredUser);
-// });
-
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
 // 404 handler
-// app.all("*", (req, res, next) => { this line is not working because * is no longer used in new version of Express
-// use below line instead
 app.all("/{*splat}", (req, res, next) => {
   next(new ExpressError(404, "Page Not Found!"));
 });
@@ -109,7 +96,7 @@ async function startServer() {
 
     console.log("connected to DB");
 
-    // Start Express server only after MongoDB connection succeeds
+    // Start server after successful DB connection
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`server is listening on port ${PORT}`);
     });
@@ -117,7 +104,6 @@ async function startServer() {
     console.error("Failed to connect to MongoDB:");
     console.error(err);
 
-    // Exit the process so Render knows the deployment failed
     process.exit(1);
   }
 }
