@@ -6,7 +6,7 @@ const passport = require("passport");
 const { saveRedirectUrl } = require("../middleware.js");
 
 router.get("/signup", (req, res) => {
-   res.render("users/signup.ejs");
+    res.render("users/signup.ejs");
 });
 
 router.post(
@@ -22,17 +22,25 @@ router.post(
           return next(err);
         }
         req.flash("success", "Welcome to Wanderlust!");
-        res.redirect("/listings");
+        
+        // CRITICAL VERCEL FIX: Force session save after signup
+        req.session.save((err) => {
+          if (err) return next(err);
+          res.redirect("/listings");
+        });
       });
     } catch (e) {
       req.flash("error", e.message);
-      res.redirect("/signup");
+      
+      req.session.save((err) => {
+          if (err) return next(err);
+          res.redirect("/signup");
+      });
     }
   })
 );
 
 router.get("/login", (req, res) => {
- 
     res.render("users/login.ejs");
 })
 
@@ -62,7 +70,12 @@ router.get("/logout", (req, res, next) => {
             return next(err);
         }
         req.flash("success", "you are logged out!");
-        res.redirect("/listings");
+        
+        // CRITICAL VERCEL FIX: Force session save so the flash message appears
+        req.session.save((err) => {
+            if (err) return next(err);
+            res.redirect("/listings");
+        });
     });
 });
 
