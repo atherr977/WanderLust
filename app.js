@@ -6,6 +6,7 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -41,19 +42,24 @@ app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
 const sessionOptions = {
-    secret: "mysupersecretcode",
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-    },
-};
-app.get("/", (req, res) => {
- res.redirect("/listings");
-});
+  secret: process.env.SESSION_SECRET || "mysupersecretcode",
+  resave: false,
+  saveUninitialized: false,
 
+  store: MongoStore.create({
+    mongoUrl: MONGO_URL,
+    collectionName: "sessions",
+    ttl: 7 * 24 * 60 * 60,
+  }),
+
+  cookie: {
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  },
+};
+app.set("trust proxy", 1);
 app.use(session(sessionOptions));
 app.use(flash());
 
