@@ -207,8 +207,8 @@ app.use("/", userRouter);
 
 //app.all("*", (req, res, next) => { this line is not working because * is nolonger used in new version Of EXpress
 //use below line instead
-app.all("/{*splat}", (req, res, next) => {
-next(new ExpressError(404, "Page Not Found!"));
+app.all(/(.*)/, (req, res, next) => {
+  next(new ExpressError(404, "Page Not Found!"));
 });
 
 app.use((err, req, res, next) => {
