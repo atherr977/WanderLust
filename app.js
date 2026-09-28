@@ -136,14 +136,14 @@ if (!MONGO_URL) {
   throw new Error("MONGO_ATLAS_URL is not defined");
 }
 
-const clientPromise = mongoose.connect(MONGO_URL)
-  .then((m) => {
-    console.log("CONNECTED TO MONGODB");
-    return m.connection.getClient();
-  })
-  .catch((err) => {
-    console.error("MONGODB CONNECTION ERROR:", err);
-  });
+const clientPromise = mongoose.connect(MONGO_URL, { family: 4, serverSelectionTimeoutMS: 5000 })
+  .then((m) => {
+    console.log("CONNECTED TO MONGODB");
+    return m.connection.getClient();
+  })
+  .catch((err) => {
+    console.error("MONGODB CONNECTION ERROR:", err);
+  });
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
