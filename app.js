@@ -6,7 +6,7 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
 const session = require("express-session");
-const MongoStore = require("connect-mongo");
+let MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -26,7 +26,6 @@ if (!MONGO_URL) {
   throw new Error("MONGO_ATLAS_URL is not defined");
 }
 
-// Fixed: Added family: 4 and timeout to prevent Vercel connection drops
 const clientPromise = mongoose.connect(MONGO_URL, { family: 4, serverSelectionTimeoutMS: 5000 })
   .then((m) => {
     console.log("CONNECTED TO MONGODB");
@@ -43,18 +42,33 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
+// DYNAMIC MONGOSTORE FIX: Bypasses Vercel's build cache issues
+// This automatically uses the correct syntax based on what version Vercel actually installed
+let sessionStore;
+if (typeof MongoStore === "function" && !MongoStore.create) {
+    // Fallback for older connect-mongo versions (v3)
+    const LegacyStore = MongoStore(session);
+    sessionStore = new LegacyStore({
+        url: MONGO_URL,
+        collection: "sessions",
+        ttl: 7 * 24 * 60 * 60,
+        touchAfter: 24 * 3600,
+    });
+} else {
+    // Syntax for modern connect-mongo versions (v4+)
+    sessionStore = MongoStore.create({
+        clientPromise: clientPromise,
+        collectionName: "sessions",
+        ttl: 7 * 24 * 60 * 60,
+        touchAfter: 24 * 3600,
+    });
+}
+
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "mysupersecretcode",
   resave: false,
   saveUninitialized: false,
-
-  store: MongoStore.create({
-    clientPromise: clientPromise,
-    collectionName: "sessions",
-    ttl: 7 * 24 * 60 * 60,
-    touchAfter: 24 * 3600,
-  }),
-
+  store: sessionStore, // Applies the dynamically generated store
   cookie: {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
@@ -62,6 +76,7 @@ const sessionOptions = {
     sameSite: "lax",
   },
 };
+
 app.set("trust proxy", 1);
 app.use(session(sessionOptions));
 app.use(flash());
@@ -84,7 +99,6 @@ app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
-// Fixed: Valid catch-all syntax for Express to prevent startup crashes
 app.all(/(.*)/, (req, res, next) => {
   next(new ExpressError(404, "Page Not Found!"));
 });
