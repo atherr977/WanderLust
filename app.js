@@ -18,8 +18,11 @@ const userRouter = require("./routes/user.js");
 if (process.env.NODE_ENV !== "production") {
     require("dotenv").config();
 }
-const MONGO_URL = process.env.MONGO_ATLAS_URL || "mongodb://127.0.0.1:27017/wanderlust";
+const MONGO_URL = process.env.MONGO_ATLAS_URL;
 
+if (!MONGO_URL) {
+  throw new Error("MONGO_ATLAS_URL is not defined");
+}
 main()
   .then(() => {
     console.log("connected to DB");
