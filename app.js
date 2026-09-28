@@ -16,24 +16,23 @@ const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
 if (process.env.NODE_ENV !== "production") {
-    require("dotenv").config();
+  require("dotenv").config();
 }
+
 const MONGO_URL = process.env.MONGO_ATLAS_URL;
 
 if (!MONGO_URL) {
   throw new Error("MONGO_ATLAS_URL is not defined");
 }
-main()
-  .then(() => {
-    console.log("connected to DB");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
 
 async function main() {
-  await mongoose.connect(MONGO_URL)
+  await mongoose.connect(MONGO_URL);
+  console.log("CONNECTED TO MONGODB");
 }
+
+main().catch((err) => {
+  console.error("MONGODB CONNECTION ERROR:", err);
+});
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
