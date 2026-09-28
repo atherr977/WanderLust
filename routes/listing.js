@@ -7,6 +7,12 @@ const { isLoggedIn, isOwner, validateListing } = require("../middleware.js");
 //Index Route
 router.get("/", wrapAsync(async (req, res) => {
   const allListings = await Listing.find({});
+
+  console.log("=================================");
+  console.log("TOTAL LISTINGS:", allListings.length);
+  console.log("FIRST LISTING:", allListings[0]);
+  console.log("=================================");
+
   res.render("listings/index.ejs", { allListings });
 }));
 
