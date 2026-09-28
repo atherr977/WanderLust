@@ -38,18 +38,22 @@ router.get("/login", (req, res) => {
 
 router.post(
   "/login",
-  saveRedirectUrl,
   passport.authenticate("local", {
     failureRedirect: "/login",
     failureFlash: true,
   }),
- async (req, res) => {
-     console.log(req.user);
-
-    req.flash("success", "Welcome back to Wanderlust!");
+  (req, res, next) => {
+    req.flash("success", "Welcome back!");
     let redirectUrl = res.locals.redirectUrl || "/listings";
-    res.redirect(redirectUrl);
-}
+    
+    // CRITICAL VERCEL FIX: Force session save to DB before redirecting
+    req.session.save((err) => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect(redirectUrl);
+    });
+  }
 );
 
 router.get("/logout", (req, res, next) => {
